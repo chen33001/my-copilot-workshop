@@ -93,7 +93,7 @@ function getEmptyMessage() {
     return todos.length > 0 ? '太棒了，沒有未完成的事項！' : '目前沒有未完成的事項。';
   }
   if (currentFilter === 'completed') {
-    return '目前沒有已完成的事項。';
+    return '目前沒有已完成的事項。未刪除的項目可切換至「全部」查看。';
   }
   return '目前沒有符合條件的待辦事項。';
 }
