@@ -1,6 +1,7 @@
 // 待辦清單使用原生 JavaScript，資料儲存在瀏覽器的 localStorage。
 const STORAGE_KEY = 'my-copilot-workshop-todos';
 const THEME_KEY = 'my-copilot-workshop-theme';
+const FILTER_KEY = 'my-copilot-workshop-filter';
 
 const form = document.getElementById('todo-form');
 const input = document.getElementById('todo-input');
@@ -70,6 +71,26 @@ function initializeTheme() {
   applyTheme(systemTheme.matches ? 'dark' : 'light');
   systemTheme.addEventListener('change', (event) => {
     applyTheme(event.matches ? 'dark' : 'light');
+  });
+}
+
+// 載入已儲存的篩選條件；沒有有效設定時使用「全部」。
+function initializeFilter() {
+  let savedFilter = null;
+  try {
+    savedFilter = localStorage.getItem(FILTER_KEY);
+  } catch (error) {
+    console.warn('讀取篩選設定失敗，將顯示全部待辦事項。', error);
+  }
+
+  if (savedFilter === 'all' || savedFilter === 'active' || savedFilter === 'completed') {
+    currentFilter = savedFilter;
+  }
+
+  filterButtons.forEach((button) => {
+    const isActive = button.dataset.filter === currentFilter;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
   });
 }
 
@@ -167,10 +188,16 @@ themeToggle.addEventListener('click', () => {
 // 切換篩選條件時同步按鈕狀態與清單內容。
 filterButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    currentFilter = button.dataset.filter;
+    const selectedFilter = button.dataset.filter;
+    if (selectedFilter !== 'all' && selectedFilter !== 'active' && selectedFilter !== 'completed') {
+      return;
+    }
+
+    localStorage.setItem(FILTER_KEY, selectedFilter);
+    currentFilter = selectedFilter;
 
     filterButtons.forEach((filterButton) => {
-      const isActive = filterButton === button;
+      const isActive = filterButton.dataset.filter === currentFilter;
       filterButton.classList.toggle('is-active', isActive);
       filterButton.setAttribute('aria-pressed', String(isActive));
     });
@@ -210,4 +237,5 @@ list.addEventListener('click', (event) => {
 });
 
 initializeTheme();
+initializeFilter();
 render();
